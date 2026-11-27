@@ -10,6 +10,62 @@
   <input type="text" placeholder="Type here">
   <button disabled>Disabled Button</button>
   <div draggable="true">Drag me!</div>
+
+  <script>
+const cursors = [
+  { name: 'default',     file: 'cursors/default.png',     x: 0,  y: 0,  selector: 'html, body', fallback: 'default' },
+  { name: 'pointer',     file: 'cursors/pointer.png',     x: 5,  y: 0,  selector: 'a, button', fallback: 'pointer' },
+  { name: 'text',        file: 'cursors/text.png',        x: 15, y: 15, selector: 'input, textarea, p, h1, h2, h3, span', fallback: 'text' },
+  { name: 'not-allowed', file: 'cursors/not-allowed.png', x: 15, y: 15, selector: 'button:disabled, input:disabled', fallback: 'not-allowed' },
+  { name: 'move',        file: 'cursors/move.png',        x: 15, y: 15, selector: '[draggable="true"]', fallback: 'move' }
+];
+
+const SCALE = 2; // 2 = 64x64 (chunky OG Windows size). Change to 1.5 or 3 if you want!
+
+Promise.all(cursors.map(c => new Promise(resolve => {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    // 1. Recolor cyan -> pure black on a 32x32 temp canvas
+    const temp = document.createElement('canvas');
+    temp.width = img.width;
+    temp.height = img.height;
+    const tCtx = temp.getContext('2d');
+    tCtx.drawImage(img, 0, 0);
+
+    const imgData = tCtx.getImageData(0, 0, temp.width, temp.height);
+    const d = imgData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const r = d[i], g = d[i + 1], b = d[i + 2], a = d[i + 3];
+      // If pixel is visible AND NOT pure white (keeps white outlines!), make it pure black
+      if (a > 0 && !(r > 240 && g > 240 && b > 240)) {
+        d[i] = 0;     // R
+        d[i + 1] = 0; // G
+        d[i + 2] = 0; // B
+      }
+    }
+    tCtx.putImageData(imgData, 0, 0);
+
+    // 2. Scale up cleanly with crisp pixel edges (no blur!)
+    const big = document.createElement('canvas');
+    big.width = Math.round(img.width * SCALE);
+    big.height = Math.round(img.height * SCALE);
+    const bCtx = big.getContext('2d');
+    bCtx.imageSmoothingEnabled = false;
+    bCtx.drawImage(temp, 0, 0, big.width, big.height);
+
+    const hotX = Math.round(c.x * SCALE);
+    const hotY = Math.round(c.y * SCALE);
+    resolve(`${c.selector} { cursor: url('${big.toDataURL()}') ${hotX} ${hotY}, ${c.fallback} !important; }`);
+  };
+  img.src = c.file;
+}))).then(rules => {
+  const style = document.createElement('style');
+  style.textContent = rules.join('\n');
+  document.head.appendChild(style);
+});
+</script>
+
 </body>
 </html>
 
