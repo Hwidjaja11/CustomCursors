@@ -1,1 +1,25 @@
+/* 1. Default Arrow */
+html, body {
+  cursor: url('cursors/default.png') 0 0, default;
+}
+
+/* 2. Pointer Hand (Links & Buttons) */
+a, button {
+  cursor: url('cursors/pointer.png') 5 0, pointer;
+}
+
+/* 3. Text I-Beam (Typing boxes & text) */
+input, textarea, p, h1, h2, h3, span {
+  cursor: url('cursors/text.png') 15 15, text;
+}
+
+/* 4. Not Allowed (Disabled buttons) */
+button:disabled, input:disabled {
+  cursor: url('cursors/not-allowed.png') 15 15, not-allowed;
+}
+
+/* 5. Move Cross (Draggable items) */
+[draggable="true"] {
+  cursor: url('cursors/move.png') 15 15, move;
+}
 
